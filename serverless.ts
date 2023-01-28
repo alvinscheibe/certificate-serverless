@@ -5,6 +5,7 @@ const serverlessConfiguration: AWS = {
   frameworkVersion: '3',
   plugins: [
     'serverless-esbuild',
+    'serverless-dynamodb-local',
     'serverless-offline'
   ],
   provider: {
@@ -20,7 +21,18 @@ const serverlessConfiguration: AWS = {
     },
   },
   // import the function via paths
-  functions: {},
+  functions: {
+    generateCertificate: {
+      handler: 'src/functions/generateCertificate.handler',
+      events: [{
+        http: {
+          path: 'generate-certificate',
+          method: 'post',
+          cors: true
+        }
+      }]
+    }
+  },
   package: { individually: true },
   custom: {
     esbuild: {
@@ -33,6 +45,14 @@ const serverlessConfiguration: AWS = {
       platform: 'node',
       concurrency: 10,
     },
+    dynamodb: {
+      stages: ['dev', 'local'],
+      start: {
+        port: 8000,
+        inMemory: true,
+        migrate: true
+      }
+    }
   },
   resources: {
     Resources: {
